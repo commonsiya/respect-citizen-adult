@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>오후 반차</title>
+<style>
+/* ===== 성인판 팔레트: 라벤더 · 보라 · 차콜그레이 ===== */
+:root{
+  --bg:#2B2A33;           /* 폰 바깥 (차콜) */
+  --bezel:#17161C;
+  --screen:#F4F1FA;       /* 폰 화면 (라벤더 화이트) */
+  --paper:#FFFFFF;
+  --ink:#1E1C26; --sub:#6F6B84; --line:#DCD6EA;
+  --accent:#6B4FBB;       /* 보라 */
+  --lav:#E6DEF7;          /* 라벤더 */
+  --charcoal:#3A3844;
+  --bub:#FFFFFF; --me:#6B4FBB;
+  --t-jiji:#B85C8A; --t-sago:#5B4FBB; --t-haeng:#4F8A6B; --t-gwan:#7A7A9C;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR","Malgun Gothic",sans-serif;
+  line-height:1.6;-webkit-text-size-adjust:100%;word-break:keep-all;overflow-wrap:break-word}
+
+/* ---- 폰 프레임 ---- */
+.phone{width:390px;height:844px;margin:28px auto;background:var(--bezel);border-radius:48px;padding:12px;
+  box-shadow:0 30px 60px rgba(0,0,0,.45);position:relative}
+.screen{background:var(--screen);border-radius:38px;height:100%;overflow:hidden;display:flex;flex-direction:column;position:relative}
+.status{display:flex;justify-content:space-between;align-items:center;padding:14px 26px 6px;font-size:14px;font-weight:600;
+  font-variant-numeric:tabular-nums;color:var(--ink)}
+.status .r{display:flex;align-items:center;gap:6px;color:var(--ink)}
+.status svg{display:block}
+.notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:120px;height:30px;background:var(--bezel);border-radius:0 0 20px 20px}
+.bar{height:2px;background:var(--line);margin:0 22px}
+.bar>i{display:block;height:100%;width:0;background:var(--accent);transition:width .35s}
+.loc{display:flex;justify-content:space-between;align-items:center;margin:10px 16px 0;padding:10px 14px;
+  background:var(--charcoal);color:#fff;border-radius:14px;font-size:14px;font-weight:700}
+.loc .n{display:flex;align-items:center;gap:8px}
+.loc .dot{width:9px;height:9px;border-radius:99px;background:var(--lav)}
+.loc .t{font-weight:600;font-variant-numeric:tabular-nums;opacity:.75}
+.loc .no{font-size:11.5px;opacity:.7;margin-left:8px;font-weight:600}
+.loc[hidden]{display:none}
+.view{flex:1;overflow-y:auto;padding:12px 16px 12px;-webkit-overflow-scrolling:touch}
+.sheet{border-top:1px solid var(--line);background:var(--paper);padding:10px 14px 12px;max-height:46%;overflow-y:auto}
+.sheet:empty{display:none}
+.home{height:5px;width:120px;background:var(--bezel);border-radius:99px;margin:6px auto 4px}
+@media(max-width:430px){
+  body{background:var(--screen)}
+  .phone{width:100%;height:100vh;height:100dvh;margin:0;border-radius:0;padding:0;box-shadow:none;background:var(--screen)}
+  .screen{border-radius:0}
+  .notch,.home{display:none}
+  .status{padding-top:max(10px,env(safe-area-inset-top))}
+  .sheet{padding-bottom:max(12px,env(safe-area-inset-bottom))}
+}
+
+/* ---- 장소 타일 (공간이 바뀌면 새 대화방으로) ---- */
+.ptile{border-radius:18px;overflow:hidden;margin:6px 0 14px;border:1px solid var(--line);background:var(--paper);box-shadow:0 2px 10px rgba(40,30,80,.08)}
+.ptile .band{height:74px;background:var(--c,#8F7CE0);position:relative}
+.ptile .band:after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(0,0,0,.18),transparent 55%,rgba(255,255,255,.18))}
+.ptile .body{padding:12px 16px 14px;display:flex;align-items:baseline;justify-content:space-between}
+.ptile .nm{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.ptile .tm{font-size:13px;color:var(--sub);font-weight:600;font-variant-numeric:tabular-nums}
+.ptile .no{font-size:12px;color:var(--sub);margin-left:8px;font-weight:600}
+
+/* ---- 채팅 ---- */
+.divider{display:flex;align-items:center;gap:10px;margin:14px 0 10px;color:var(--sub);font-size:12.5px;font-weight:700;letter-spacing:.04em}
+.divider:before,.divider:after{content:"";flex:1;height:1px;background:var(--line)}
+.sys{text-align:center;font-size:13.5px;color:var(--sub);margin:14px 12px;line-height:1.7;text-wrap:balance}
+.sys .ln{display:block}
+.msg{display:flex;flex-direction:column;align-items:flex-start;margin:12px 0}
+.row{display:flex;gap:8px;align-items:flex-start;margin:12px 0}
+.row .col{display:flex;flex-direction:column;align-items:flex-start;min-width:0;flex:1}
+.av{width:36px;height:36px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;overflow:hidden;
+  background:var(--avc,#B9B3CC);box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+.av svg{width:36px;height:36px;display:block}
+.av.sysav{border-radius:10px}
+.who{font-size:12.5px;color:var(--ink);margin:0 0 4px 6px;font-weight:700}
+.b{background:var(--bub);color:var(--ink);border:1px solid var(--line);border-radius:18px 18px 18px 5px;
+  padding:11px 15px;font-size:15.5px;max-width:86%;line-height:1.6;box-shadow:0 1px 3px rgba(40,30,80,.06);text-wrap:pretty}
+.msg.me{align-items:flex-end}
+.msg.me .who{margin:0 6px 4px 0;color:var(--accent)}
+.msg.me .b{background:var(--me);color:#fff;border-color:var(--me);border-radius:18px 18px 5px 18px}
+.b.push{padding:0;background:transparent;border:0;box-shadow:none;max-width:92%}
+/* 링크 미리보기 타일: 위 썸네일(색 블록) + 아래 회색 정보 영역 */
+.push{width:290px;border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 2px 8px rgba(60,40,120,.08)}
+.push .thumb{height:118px;display:flex;align-items:flex-end;padding:14px 16px;color:#fff;
+  background:linear-gradient(135deg,#3A3844 0%,#5B4FBB 60%,#8F7CE0 100%);position:relative}
+.push .thumb:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 80% 15%,rgba(255,255,255,.18),transparent 45%)}
+.push .big{font-size:34px;font-weight:900;letter-spacing:-.02em;line-height:1;position:relative;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.push .meta{background:#EEEBF5;padding:10px 14px 11px}
+.push .ttl{font-size:13.5px;font-weight:700;line-height:1.45;color:var(--ink)}
+.push .src{font-size:11.5px;color:var(--sub);margin-top:5px;display:flex;align-items:center;gap:6px}
+.push .src:before{content:"";width:12px;height:12px;border-radius:3px;background:var(--accent);opacity:.7;flex:0 0 auto}
+.info{background:var(--lav);border-left:3px solid var(--accent);border-radius:12px;padding:12px 14px;margin:12px 0;font-size:14.5px;color:var(--ink)}
+
+/* ---- 하단 시트 ---- */
+button{font:inherit}
+.ask{font-size:13px;color:var(--ink);margin:2px 4px 8px;font-weight:700}
+.opt{display:block;width:100%;text-align:left;background:#fff;color:var(--ink);border:1.5px solid var(--line);
+  border-radius:16px;padding:12px 14px;margin-bottom:8px;cursor:pointer;font-size:15.5px;line-height:1.5;font-weight:500}
+.opt:hover{border-color:var(--accent);background:var(--screen)}
+.btn{display:block;width:100%;background:var(--accent);color:#fff;border:0;border-radius:14px;
+  padding:14px;font-size:15.5px;font-weight:700;cursor:pointer;margin-top:4px}
+.btn.ghost{background:transparent;color:var(--sub);border:1px solid var(--line);font-weight:600;margin-top:8px}
+.btn.dark{background:var(--charcoal)}
+.btn.inline{display:inline-block;width:auto;padding:10px 22px;font-size:14.5px;border-radius:12px;margin-top:6px}
+
+/* ---- 카드 ---- */
+.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:18px;margin:12px 0}
+h1{font-size:28px;line-height:1.3;margin:0 0 6px;letter-spacing:-.01em}
+h2{font-size:17px;margin:0 0 10px}
+p{margin:0 0 10px}
+.small{font-size:13px;color:var(--sub)}
+.eyebrow{font-size:12px;color:var(--sub);letter-spacing:.06em;margin-bottom:8px}
+.result{text-align:center;padding:24px 18px}
+.result .emo{font-size:52px;line-height:1}
+.result .nm{font-size:26px;font-weight:800;margin-top:6px}
+.result .sb{font-size:14px;color:var(--sub)}
+.result .desc{margin-top:14px;font-size:15.5px;text-align:left}
+.hand{border-top:1px dashed var(--line);margin-top:16px;padding-top:14px;text-align:left;font-size:14px}
+.hand b{display:block;font-size:12px;color:var(--sub);margin-bottom:4px}
+.reveal{border-left:3px solid var(--accent);padding:2px 0 2px 12px;margin:14px 0}
+.reveal .n{font-size:22px;font-weight:800;color:var(--accent)}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border:1px solid var(--line);
+  border-radius:12px;background:var(--paper);margin-bottom:7px;cursor:pointer;font-size:14.5px;line-height:1.55}
+.chk input{margin:4px 0 0;width:18px;height:18px;flex:0 0 auto;accent-color:var(--accent)}
+.chk.on{border-color:var(--accent);background:var(--lav)}
+.chk .ex{display:block;font-style:normal;font-size:12.5px;color:var(--sub);margin-top:3px}
+.acro{display:flex;gap:12px;align-items:baseline;padding:11px 0;border-top:1px solid var(--line)}
+.acro:first-of-type{border-top:0}
+.acro .h{font-size:23px;font-weight:800;color:var(--accent);width:26px;flex:0 0 auto;line-height:1.25}
+.acro .t{font-size:15.5px;font-weight:500;color:var(--charcoal);line-height:1.55}
+/* ---- 신호등 문항: 예 / 아니오 ---- */
+.q{border:1px solid var(--line);border-radius:14px;padding:12px 13px 10px;margin-bottom:9px;background:var(--paper)}
+.q.done{border-color:#CFC6E6;background:#FBFAFE}
+.q .qt{font-size:14.5px;line-height:1.55;display:flex;gap:8px}
+.q .qn{font-weight:800;color:var(--sub);flex:0 0 auto;font-variant-numeric:tabular-nums}
+.q .ex{display:block;font-style:normal;font-size:12.5px;color:var(--sub);margin-top:4px}
+.yn{display:flex;gap:7px;justify-content:flex-end;margin-top:9px}
+.ynb{border:1.5px solid var(--line);background:#fff;color:var(--sub);border-radius:11px;
+  padding:7px 16px;font-size:14px;font-weight:700;cursor:pointer;min-width:64px}
+.ynb:hover{border-color:var(--accent)}
+.ynb.on{color:#fff;border-color:transparent}
+.ynb.yes.on{background:var(--accent)}
+.ynb.no.on{background:#8C8A9C}
+.prog{font-size:13px;font-weight:700;color:var(--sub);margin:2px 4px 8px;display:flex;justify-content:space-between}
+.btn[disabled]{opacity:.35;cursor:default}
+/* ---- 결과: 나의 존중 ---- */
+.tp{border-top:1px solid var(--line);padding:15px 0 4px}
+.tp:first-of-type{border-top:0;padding-top:4px}
+.tp .lb{font-size:11.5px;color:var(--sub);font-weight:700;letter-spacing:.03em}
+.tp .v{display:flex;align-items:center;gap:11px;margin-top:8px}
+.tp .e{font-size:32px;line-height:1}
+.tp .n{font-size:19px;font-weight:800}
+.tp .s{font-size:12.5px;color:var(--sub)}
+.tp .gd{font-size:14px;line-height:1.6;margin-top:9px}
+.grp{margin:18px 0 4px;font-weight:800;font-size:16px}
+.grp small{display:block;font-weight:600;font-size:12px;color:var(--sub);margin-top:2px}
+.dual{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+@media(max-width:400px){.dual{grid-template-columns:1fr}}
+.dual>div{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--paper)}
+.dual .lb{font-size:11px;color:var(--sub);font-weight:700;letter-spacing:.04em}
+.barrow{display:flex;align-items:center;gap:8px;margin:7px 0;font-size:13px}
+.barrow .nm{width:52px;flex:0 0 auto}
+.barrow .tr{flex:1;height:9px;background:var(--line);border-radius:99px;overflow:hidden}
+.barrow .tr i{display:block;height:100%;border-radius:99px}
+.barrow .vv{width:22px;text-align:right;color:var(--sub);font-variant-numeric:tabular-nums}
+.note{background:var(--lav);border-radius:12px;padding:13px;font-size:14px;margin:12px 0}
+.foot{text-align:center;margin:22px 0 10px;line-height:1.7}
+.foot b{display:block;font-size:14px;font-weight:800;color:var(--accent);letter-spacing:.02em}
+.foot span{display:block;font-size:12px;color:var(--sub)}
+.foot .org{font-size:13px;font-weight:700;color:var(--charcoal);margin-top:6px}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="screen">
+    <div class="notch"></div>
+    <div class="status">
+      <span id="clock">&nbsp;</span>
+      <span class="r">
+        <svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true"><path d="M8 11.2 6.1 9.3a2.7 2.7 0 0 1 3.8 0L8 11.2Zm-3.6-3.6-1.5-1.5a7.2 7.2 0 0 1 10.2 0l-1.5 1.5a5.1 5.1 0 0 0-7.2 0ZM1.4 4.1 0 2.7a11.3 11.3 0 0 1 16 0l-1.4 1.4a9.3 9.3 0 0 0-13.2 0Z" fill="currentColor"/></svg>
+        <svg width="24" height="12" viewBox="0 0 24 12" aria-hidden="true"><rect x=".5" y=".5" width="20" height="11" rx="3" fill="none" stroke="currentColor"/><rect x="2" y="2" width="15" height="8" rx="1.5" fill="currentColor"/><rect x="21.5" y="4" width="2" height="4" rx="1" fill="currentColor" opacity=".5"/></svg>
+      </span>
+    </div>
+    <div class="bar"><i id="prog"></i></div>
+    <div class="view" id="log"></div>
+    <div class="sheet" id="sheet"></div>
+    <div class="home"></div>
+  </div>
+</div>
+
+<script>
+/* ==========================================================================
+   DATA — 모든 문안은 이 블록에서만 수정한다.
+   유형 체계는 청소년판(quiz-talk)과 동일: 지지 · 사고 · 행동 · 관찰
+   반응(r)은 "화자: 말" 형식이면 말풍선, 아니면 상황 서술로 표시된다.
+   ========================================================================== */
+const T = {
+  jiji : {key:'jiji', emo:'💗', nm:'지지형', sub:'일단 그 사람 편', color:'var(--t-jiji)',
+    desc:'오늘 당신은 사람 쪽으로 먼저 움직였다. 사정을 묻고, 편을 들고, 분위기를 눅였다.',
+    hand:'사정을 묻는 한마디가 상대의 부담을 덜어 줍니다.'},
+  sago : {key:'sago', emo:'🧠', nm:'사고형', sub:'사실과 해결책', color:'var(--t-sago)',
+    desc:'오늘 당신은 상황을 먼저 정리했다. 사실로 짚고, 해볼 만한 방법을 내놨다.',
+    hand:'감정만 말하기보다 사실을 함께 말하면 요구가 분명해집니다.'},
+  haeng: {key:'haeng',emo:'🏃', nm:'행동형', sub:'말보다 먼저', color:'var(--t-haeng)',
+    desc:'오늘 당신은 말 대신 움직였다. 문을 잡고, 서류를 미리 꺼내고, 기록을 남겼다.',
+    hand:'말로 하기 어려울 때는 행동으로 대신할 수 있습니다.'},
+  gwan : {key:'gwan', emo:'🌙', nm:'관찰형', sub:'조용한 스캐너', color:'var(--t-gwan)',
+    desc:'오늘 당신은 한 발 뒤에서 지켜봤다. 나서지 않았지만, 놓치지도 않았다.',
+    hand:'지켜보는 것도 대응입니다. 언제 말할지는 관찰에서 정해집니다.'}
+};
+const ORDER = ['jiji','sago','haeng','gwan'];
+
+/* ===== 결과 수집 (익명 집계) =====
+   구글시트 Apps Script 웹앱 URL을 여기에 넣으면 최종 유형만 익명으로 전송된다.
+   비워 두면 아무것도 전송하지 않는다(무저장 모드). */
+const COLLECT = { url:'https://script.google.com/macros/s/AKfycbyMboO82TEI8Z3ygbECRrKMsaafeaiGWSMZANheUZ1o_yF-dmJ3ALA4d2GXqrmaMeDSww/exec' };
+
+const PLACE_COLORS={'출근길':'#B9B3CC','사무실':'#8F7CE0','점심':'#D2A24C','식당':'#D2A24C','주민센터':'#6FB08C','집':'#C9A7E8','편의점':'#E08A6A'};
+
+/* 지식 관문: 동료와의 채팅. 오답이면 되묻고, 정답 뒤에는 현실 이야기(beat)가 한 번 더 이어진다. beat의 선택은 채점하지 않는다. */
+const STEPS = [
+ {t:'intro'},
+
+ {t:'gate', time:'08:10', place:'출근길', who:'동료',
+  lead:[{sys:'출근길 지하철. 동료가 기사를 하나 보냈다.'}],
+  news:{app:'뉴스', big:'업무 중단', ttl:'고객이 폭언하면 사업주는 응대를 중단시켜야 한다 — 산업안전보건법 제41조', src:'고객응대근로자 보호 조항'},
+  q:'이거 봤어? 근데 이건 회사가 알아서 할 일이지, 법에 있는 건 아니지 않나?',
+  opts:[{s:'그렇지, 회사 재량이지.', ok:false},{s:'아니야, 법에 있는 거야.', ok:true}],
+  wrong:'그런가? 근데 제목이 "업무 중단"인데… 회사 재량이면 기사가 됐겠어?',
+  retry:{q:'그럼 상담원이 전화를 먼저 끊어도 되는 경우가 법에 있다는 거야?',
+         opts:[{s:'있어', ok:true},{s:'없어', ok:false}]},
+  good:'그러네. 법에 있는 거였네.',
+  info:'고객응대근로자 보호는 사업주의 법적 의무다. 응대 중단·전환, 고소 지원까지 포함된다.',
+  beat:'근데 법에 있으면 뭐 해. 끊으면 그 전화 다른 사람이 받아야 하는데. 우리 팀도 그렇잖아.',
+  beatOpts:[
+    {s:'그러니까. 끊는 게 쉽지 않지.', r:'응. 있어도 못 쓰는 법이 제일 답답해.'},
+    {s:'그래도 있는 줄은 알아야지.', r:'하긴. 아는 사람이 있어야 누가 끊든 하지.'}
+  ]},
+
+ {t:'scene', time:'09:20', place:'사무실',
+  lead:[{sys:'옆자리 통화가 길어진다. "죄송합니다"가 다섯 번째다. 수화기 너머 소리가 여기까지 샌다.'},
+        {sys:'통화가 끊기고, 동료는 화면만 본다. 2시 반차다. 오전만 버티면 된다.'}],
+  picks:[
+   {ask:'나는', opts:[
+     {k:'jiji', s:'"그 사람 원래 그래요. 수고했어요."', r:'동료: …네.'},
+     {k:'sago', s:'"그 정도면 폭언이에요. 기록 남겨요."', r:'동료: 아, 그런 게 있어요? …근데 끊으면 그 전화 옆자리가 받잖아요.'},
+     {k:'haeng',s:'말없이 커피 한 잔 올려둔다.', r:'동료: …고마워요.'},
+     {k:'gwan', s:'모른 척해 준다.', r:'10분쯤 뒤, 동료가 먼저 자리에서 일어났다.'}]},
+   {ask:'팀장이 지나가며 한마디 한다. "그런 전화야 다 받는 거지 뭐." 나는', opts:[
+     {k:'sago', s:'"매뉴얼상 끊어도 되는 건인데요."', r:'팀장: …하긴, 규정이 그렇지. 근데 끊으면 그 전화가 어디로 가겠어.'},
+     {k:'jiji', s:'"저라도 오늘은 힘들었을 거예요."', r:'팀장: …뭐, 그렇긴 하지.'},
+     {k:'haeng',s:'공용 기록지에 한 줄 남긴다.', r:'남긴 기록은 분기 보고에 한 줄로 올라갔다.'},
+     {k:'gwan', s:'대답 대신 동료 쪽을 본다.', r:'아무도 더 말하지 않았다. 자리로 돌아왔다.'}]}
+  ]},
+
+ {t:'gate', time:'12:20', place:'점심', who:'동료',
+  lead:[{sys:'점심. 아까 그 동료와 마주 앉았다. 주문은 테이블 화면으로 했다.'},{sys:'동료가 폰을 내민다. 기사 하나가 떠 있다.'}],
+  news:{app:'뉴스', big:'73.4%', ttl:'"대체 인력이 없어 피하기 어렵다" — 감정노동자 설문', src:'감정노동전국네트워크 · 2024 · 전국 177명'},
+  q:'법에 응대 중단이 있다며. 그럼 심한 손님은 그냥 피하면 되는 거 아니야?',
+  opts:[{s:'그렇지, 피하면 되지.', ok:false},{s:'실제로는 피하기 어렵지.', ok:true}],
+  wrong:'그런가… 근데 이 수치는 뭐야. 열에 일곱이 못 피한다는데.',
+  retry:{q:'대체할 사람이 없으면 자리를 비울 수 있나?',
+         opts:[{s:'못 비우지', ok:true},{s:'비울 수 있지', ok:false}]},
+  good:'하긴. 자리 비우면 그 전화 누가 받아.',
+  info:'같은 설문에서 54.5%가 "비정상적 요구·폭력으로부터 자유롭게 피할 수 있다"에 아니라고 답했다. 법은 있지만 현장에서 작동하지 않는다.',
+  beat:'아까 그 전화도 그래서 안 끊은 거야. 내가 안 받으면 옆자리가 받으니까.',
+  beatOpts:[
+    {s:'그 얘긴 오늘 처음 듣네.', r:'다들 그래. 말을 안 할 뿐이지.'},
+    {s:'그럼 팀이 정해야 하는 거네.', r:'그렇지. 혼자 끊으면 혼자 욕먹거든.'}
+  ]},
+
+ {t:'scene', time:'12:40', place:'식당',
+  lead:[{sys:'20분째 우리 테이블만 안 나온다.'},
+        {sys:'나중에 온 옆 테이블은 벌써 먹고 있다. 홀 직원은 두 명이다.'},
+        {sys:'동료는 1시까지 들어가야 한다. 나는 2시부터 반차인데, 주민센터도 병원도 오늘 안에 가야 한다.'},
+        {w:'직원', s:'잠시만요, 금방 나갑니다!'},
+        {sys:'그 말을 두 번째 듣는다.'}],
+  picks:[
+   {ask:'나는', opts:[
+     {k:'sago', s:'"12시 20분 주문 확인 부탁드려요."', r:'직원: 네, 바로 확인하겠습니다.'},
+     {k:'jiji', s:'"바쁘신데, 저희 주문 들어갔을까요?"', r:'직원: 아, 네. 확인할게요.'},
+     {k:'haeng',s:'주문 화면을 켜 놓고 손을 든다.', r:'직원: (화면을 보고) 네, 확인할게요.'},
+     {k:'gwan', s:'조금 더 기다려 본다.', r:'직원이 주방 쪽으로 뛰어갔다.'}]},
+   {pre:[{w:'직원', s:'죄송합니다. 확인해 보니 주문이 빠졌습니다. 지금 넣으면 10분 걸립니다.'}],
+    ask:'12시 45분. 나는', opts:[
+     {k:'jiji', s:'"괜찮아요. 넣어 주세요."', r:'직원: 죄송합니다. 최대한 빨리요. — 8분 뒤 나왔다. 동료는 반만 먹고 일어났다.'},
+     {k:'sago', s:'"그럼 결제 취소 부탁드립니다."', r:'직원: 네, 바로 취소해 드리겠습니다. 죄송합니다.'},
+     {k:'haeng',s:'일어나며 물컵과 수저를 한쪽으로 모아 둔다.', r:'치우기 편하게. 그게 다였다.'},
+     {k:'gwan', s:'동료에게 "어떻게 할래?" 하고 맡긴다.', r:'동료: 나 들어가야 돼. 김밥 먹지 뭐.'}]}
+  ],
+  out:'1시. 동료는 사무실로, 나는 주민센터로 향했다.'},
+
+ {t:'scene', time:'14:10', place:'주민센터',
+  lead:[{sys:'3시 반에 병원 예약이 있다. 번호표를 뽑고 보니 앞에 여덟 명.'},
+        {sys:'앞 순번 민원인이 언성을 높인다.'},
+        {w:'앞 민원인', s:'원래 다 해줬어! 딴 데는 되던데!'},
+        {w:'창구 직원', s:'죄송합니다. 본인 확인이 안 되면 발급이 어렵습니다.'},
+        {sys:'같은 말을 세 번째 반복하고 있다.'},
+        {sys:'십 분이 그렇게 갔다. 내 차례다.'}],
+  picks:[
+   {ask:'창구 앞에서, 나는', opts:[
+     {k:'sago', s:'"이걸로 되는 방법이 있을까요?"', r:'창구 직원: 그럼 이 서식으로 하시면 됩니다.'},
+     {k:'jiji', s:'"규정이면요. 뭘 준비하면 될까요?"', r:'창구 직원: 이 두 가지만 가져오시면 됩니다.'},
+     {k:'haeng',s:'신분증과 서류를 미리 올려둔다.', r:'창구 직원: 네, 바로 처리됩니다.'},
+     {k:'gwan', s:'직원이 숨 고르길 잠깐 기다린다.', r:'직원이 한 번 숨을 쉬고 "다음 분" 하고 불렀다.'}]}
+  ],
+  out:'서류 하나가 모자랐다. 다시 와야 한다. 밖으로 나오니 3시. 병원까지 20분이다.'},
+
+ {t:'scene', time:'17:10', place:'집',
+  lead:[{sys:'병원은 예약 시간에 겨우 맞췄다. 집에 오니 5시.'},
+        {sys:'인터넷은 여전히 불안정하다. 사흘째다. 사무실에서는 대기 8분을 못 기다려 매번 끊었다. 지금은 기다릴 수 있다.'},
+        {w:'안내 멘트', s:'고객님의 폭언은 관련 법에 따라 처벌받을 수 있습니다.'},
+        {w:'상담원', s:'확인해 보니 저희 쪽 장애는 아닌 것으로 나옵니다.'}],
+  picks:[
+   {ask:'나는', opts:[
+     {k:'sago', s:'"끊긴 시간대를 적어 뒀어요."', r:'상담원: 네, 알려주시면 다시 조회해 보겠습니다.'},
+     {k:'jiji', s:'"그쪽 잘못이라는 게 아니고요."', r:'상담원: 네, 같이 확인해 보겠습니다.'},
+     {k:'haeng',s:'오류 화면과 모델명을 불러준다.', r:'상담원: 그 모델이면 사례가 하나 있습니다. 확인해 볼게요.'},
+     {k:'gwan', s:'키보드 소리를 들으며 기다린다.', r:'상담원: 고객님, 확인된 게 하나 있습니다.'}]},
+   {ask:'기사 방문은 이틀 뒤란다. 통화를 끝내며 나는', opts:[
+     {k:'jiji', s:'"네, 수고하세요."', r:'상담원이 마지막 안내 멘트를 읽었다. 늘 하는 멘트다.'},
+     {k:'sago', s:'"접수번호만 다시 불러 주세요."', r:'상담원: 네, ○○○번입니다. 감사합니다.'},
+     {k:'haeng',s:'만족도 조사에 끝까지 응답한다.', r:'그게 어디로 가는지는 모르지만, 끝까지 눌렀다.'},
+     {k:'gwan', s:'더 말하지 않고 끊는다.', r:'수화기를 내려놓고 한참 앉아 있었다.'}]}
+  ],
+  out:'오후가 그렇게 갔다.'},
+
+ {t:'scene', time:'21:00', place:'편의점',
+  lead:[{sys:'저녁거리를 사러 나왔다. 계산대에 선 사람은 조끼를 입은 청소년이다.'},
+        {w:'앞 손님', s:'이거 봉투.'},
+        {sys:'반말을 던지고 나간다. 내 차례다. 오늘 하루가 머릿속에 아직 남아 있다.'}],
+  picks:[
+   {ask:'계산대 앞에서, 나는', opts:[
+     {k:'sago', s:'"봉투 하나 주세요. 카드요."', r:'알바생: 네, 1,600원입니다.'},
+     {k:'jiji', s:'"봉투 하나 부탁드려요."', r:'알바생: 네, 감사합니다.'},
+     {k:'haeng',s:'카드를 두 손으로 건넨다.', r:'알바생: 아, 제가 해드릴게요. — 같이 담았다. 3초 빨랐다.'},
+     {k:'gwan', s:'평소보다 조용히 계산한다.', r:'"안녕히 가세요" 소리가 등 뒤에서 났다.'}]}
+  ]},
+
+ {t:'scene', time:'21:30', place:'집',
+  lead:[{sys:'밥 하기는 싫었다. 시킨 건 40분 늦게 왔고 국물이 샜다.'},
+        {w:'배달앱', s:'리뷰를 남겨주세요.'},
+        {sys:'오늘은 여러 가지가 어긋난 날이다.'}],
+  picks:[
+   {ask:'리뷰 창 앞에서, 나는', opts:[
+     {k:'sago', s:'"40분 지연, 포장 샘. 맛은 좋았음."', r:'다음 날 답글이 달렸다. "포장 바꿨습니다. 죄송합니다."'},
+     {k:'jiji', s:'"비 오는 날인데 감사합니다."', r:'답글은 없었다.'},
+     {k:'haeng',s:'사진 찍어 1:1 문의로만 보낸다.', r:'30분 뒤 답이 왔다. "다음 주문 때 챙기겠습니다."'},
+     {k:'gwan', s:'오늘은 쓰지 않는다.', r:'화난 채로 쓴 리뷰를 지운 적이 있다. 오늘은 그냥 뒀다.'}]}
+  ]},
+
+ {t:'end'}
+];
+
+const ENDING = {
+  lead:['반차를 낸 하루가 끝났다. 인터넷은 이틀 뒤에 고쳐진다. 서류는 다시 떼러 가야 한다.',
+        '오늘 나는 누구에게도 언성을 높이지 않았다.'],
+  /* 리빌은 한 장만 남긴다. 나머지 수치(61.9% / 63.9% / 73.4% / 형법 제311조)는 화면에서 빼고
+     부스·자료집 쪽에서 쓴다. 73.4%는 관문 2에서 이미 나온다. */
+  reveal:{n:'74.5% vs 53.9%', h:'기억의 격차',
+    b:'고객이 언성을 높인 적이 있다고 답한 비율입니다. 앞은 상담사, 뒤는 시민입니다. 같은 통화를 두고 응답이 20.6%p 차이가 납니다.',
+    s:'직장갑질119·우분투센터, 2021 · 전국'}
+};
+
+/* ===== 감정노동 존중 신호등 테스트 — 추가 섹션 =====
+   문항 10개·등급 4단계·법규표는 『감정노동과 부천시민다움』 자료집 3)·4)항 원문이다.
+   기존 개발본을 그대로 쓴다. 문안을 임의로 고치지 않는다. */
+const SIGNAL = {
+  /* 안내문은 자료집 원문이되, 마지막 어절만 응답 방식(예/아니오)에 맞춰 바꿨다. 원문: "…한 적이 있다면 체크(✓)해 주세요." */
+  guide:'최근 3개월간 고객센터, 매장, 병원, 민원실 등에서 고객응대 노동자를 대하며 아래와 같은 행동을 한 적이 있다면 "예"를, 없다면 "아니오"를 눌러 주세요.',
+  items:[
+    {s:'고객응대 노동자에게 반말이나 짜증 섞인 말투를 쓴 적이 있다.'},
+    {s:'불만을 표현하면서 욕설이나 인신공격을 한 적이 있다.', ex:'"그렇게 일해서 돈 벌고 싶냐?", "머리가 나쁘냐?" 등'},
+    {s:'안내받은 정책이나 규정을 무시하고 억지 요구를 한 적이 있다.', ex:'"원래 다 해줬다", "다른 곳은 된다."'},
+    {s:'상대방의 설명을 듣지 않고 일방적으로 대화를 끊거나 무시한 적이 있다.'},
+    {s:'외모, 말투, 나이, 직업 등을 근거로 상대방을 평가하거나 무시한 적이 있다.', ex:'"어려 보여서 뭘 모르네", "말투가 왜 그러냐"'},
+    {s:'개인적인 감정을 풀기 위해 장시간(빈번한) 하소연 또는 화풀이한 적이 있다.'},
+    {s:'요청이 정당하게 거절되었는데도 보복성 민원을 제기한 적이 있다.'},
+    {s:'작은 실수나 말투를 문제 삼아 악의적인 후기를 남긴 적이 있다.'},
+    {s:'과도한 친절이나 사적인 관심을 요구한 적이 있다.'},
+    {s:'응대 후 감사나 인사 없이 불쾌한 태도로 마무리한 적이 있다.'}
+  ],
+  grades:[
+    {max:0, emo:'🟣', nm:'존중의 보라등', cnt:'0개', color:'#6B4FBB',
+     d:'감정노동자를 동료시민으로 존중하는 성숙한 시민 의식을 갖춘 신호. 감정노동 존중을 당연한 가치로 실천하는 존중시민입니다.'},
+    {max:3, emo:'🟡', nm:'성찰의 노란등', cnt:'1~3개', color:'#D2A24C',
+     d:'대부분의 상황에서 존중 시민이지만, 의도치 않게 감정노동자에게 부정적 감정노동을 유발할 수 있다는 주의 신호. 자신의 행동이 미칠 영향을 ‘잠시 멈춤’하고 살펴보세요.'},
+    {max:6, emo:'🔴', nm:'멈춤의 빨간등', cnt:'4~6개', color:'#C8503C',
+     d:'감정노동자에게 상당한 정신적 스트레스를 유발한다는 명백한 위험 신호. 자신의 행동이 ‘갑질’일 수 있음을 인지하고 ‘바로 멈춤’과 적극적 개선이 필요합니다.'},
+    {max:10, emo:'⚫', nm:'고장 난 신호등', cnt:'7개 이상', color:'#3A3844',
+     d:'인식체계가 고장 난 상태. 감정노동자의 인격을 파괴하고 노동환경을 심각하게 위협하는 수준. 전문가의 도움이나 교육을 통해 신호 체계를 근본적으로 점검해야 하는 상태입니다.'}
+  ],
+  /* 4행시는 자료집 2)항 「부천시민다움 '존중시민'」 원문이다. */
+  slogan:{title:'감정노동 존중을 당연한 가치로', sub:'부천시민다움 · 존중시민',
+    lines:[
+      {h:'존', t:'존댓말은 기본, 정중함은 품격'},
+      {h:'중', t:'중요한 내용만 명확하게'},
+      {h:'시', t:'시선은 따뜻하게, 대화는 동등하게'},
+      {h:'민', t:'민원은 이성적으로, 해결은 합리적으로'}
+    ]}
+};
+
+/* 개념 정의 — 자료집 3.1) 주요 개념. 존중시민은 정의 뒷부분만 쓴다(앞의 "실천 전략을 상징하는 개념으로"는 화면에서 뺌). */
+const DEF = {
+  citizen:'감정노동자를 동료 시민으로 대하며 존중하는 태도를 실천하는 시민',
+  buchoen:'감정노동 존중을 당연한 가치로 실천하는 부천 시민의 성숙한 시민의식과 품격'
+};
+
+/* ========================================================================== */
+const log=document.getElementById('log'), sheet=document.getElementById('sheet');
+const clockEl=document.getElementById('clock'), progEl=document.getElementById('prog');
+let si=0, pi=0, tally={jiji:0,sago:0,haeng:0,gwan:0}, gameType=null;
+let chk={};
+const TOTAL_PICKS=9; let donePicks=0;
+const SCENES=STEPS.filter(s=>s.t==='scene').length;
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; }
+function setTop(time,place){
+  clockEl.innerHTML=time||'&nbsp;'; progEl.style.width=(donePicks/TOTAL_PICKS*100)+'%';
+}
+function push(html){ const d=document.createElement('div'); d.innerHTML=html; while(d.firstChild) log.appendChild(d.firstChild); log.scrollTop=log.scrollHeight; }
+function setSheet(html){ sheet.innerHTML=html||''; log.scrollTop=log.scrollHeight; }
+function clearLog(){ log.innerHTML=''; }
+function sys(s){ const parts=String(s).split(/(?<=[.!?])\s+(?=\S)/); return `<div class="sys">${parts.map(x=>`<span class="ln">${esc(x)}</span>`).join('')}</div>`; }
+/* 화자별 아바타 — 같은 사람은 어디서나 같은 색·얼굴. 동료는 한 명(옆자리, 폭언 전화를 받은 그 사람). */
+const AV={
+  '동료':{c:'#8F7CE0'}, '팀장':{c:'#5C5A6E'}, '창구 직원':{c:'#6FB08C'}, '상담원':{c:'#C9A7E8'},
+  '알바생':{c:'#E08A6A'}, '앞 손님':{c:'#A39FB5'}, '앞 민원인':{c:'#A39FB5'}, '직원':{c:'#D2A24C'},
+  '안내 멘트':{c:'#3A3844',sys:'☏'}, '배달앱':{c:'#3A3844',sys:'▣'}
+};
+function face(){ return `<svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="14" r="6.2" fill="#fff" opacity=".92"/><path d="M6.5 32c1.3-6.4 6-9.6 11.5-9.6S28.2 25.6 29.5 32Z" fill="#fff" opacity=".92"/></svg>`; }
+function avatar(who){ const a=AV[who]||{c:'#B9B3CC'};
+  return a.sys?`<span class="av sysav" style="--avc:${a.c};color:#fff;font-size:16px">${a.sys}</span>`:`<span class="av" style="--avc:${a.c}">${face()}</span>`; }
+function bub(who,s,me){ return `<div class="msg${me?' me':''}"><span class="who">${esc(who)}</span><span class="b">${esc(s)}</span></div>`; }
+function me(s){ return bub('나',s,true); }
+function react(r){ const m=r.match(/^([^:：]{1,12})[:：]\s*(.+)$/); return m?bub(m[1],m[2]):sys(r); }
+function leadHTML(lead){ return lead.map(l=>l.sys?sys(l.sys):bub(l.w,l.s)).join(''); }
+function sceneNo(){ return STEPS.slice(0,si+1).filter(s=>s.t==='scene').length; }
+let lastPlace=null;
+function placeTile(st){
+  return `<div class="loc" style="margin:4px 0 14px"><span class="n"><i class="dot" style="background:${PLACE_COLORS[st.place]||'#8F7CE0'}"></i>${esc(st.place)}${st.t==='scene'?`<span class="no">${sceneNo()}/${SCENES}</span>`:''}</span><span class="t">${esc(st.time)}</span></div>`;
+}
+/* 관문·장면마다 새 대화방: 로그 비우고 장소 타일(장소·시각)로 시작. 한 장면 안의 대화는 이어진다. */
+function enter(st){ clearLog(); lastPlace=st.place; return placeTile(st); }
+function optsHTML(ask,opts,fn){ // fn(name) : global handler name, index passed
+  return `<div class="ask">${esc(ask)}</div>`+opts.map((o,i)=>`<button class="opt" onclick="${fn}(${i})">${esc(o.s)}</button>`).join('');
+}
+
+function render(){
+  const st=STEPS[si];
+  if(st.t==='intro') return renderIntro();
+  if(st.t==='gate') return renderGate(st);
+  if(st.t==='scene') return renderScene(st);
+  if(st.t==='end') return renderEnd();
+}
+
+/* ---------- 시작 ---------- */
+function renderIntro(){
+  setTop('',null);
+  push(`<div class="card" style="margin-top:8px">
+    <div class="eyebrow">존중시민 · 성인</div>
+    <h1>오후 반차</h1>
+    <p class="small" style="margin-bottom:16px">반차를 낸 오후, 여섯 번의 마주침</p>
+    <p>집 인터넷이 사흘째 불안정하다. 사무실에서 몇 번 전화했지만 대기가 길어 매번 끊었다.</p>
+    <p>오늘은 2시부터 오후 반차다. 주민센터에 들르고, 3시 반 병원 예약을 다녀오고, 인터넷 문제를 마무리할 생각이다.</p>
+    ${COLLECT.url?'<p class="small" style="margin-bottom:14px">선택 과정은 저장하지 않습니다. 마지막 유형 결과만 익명으로 집계됩니다.</p>':''}
+    <button class="btn inline" onclick="si++;render()">시작 →</button>
+  </div>
+  <div class="foot"><b>존중시민</b><span>감정노동 존중 『부천시민다움』</span><span class="org">부천시일쉼지원센터</span></div>`);
+  setSheet('');
+}
+
+/* ---------- 지식 관문 (동료와의 채팅) ---------- */
+let G=null, gRetried=false, gOpts=[];
+function renderGate(st){
+  G=st; gRetried=false; setTop(st.time, st.place);
+  push(enter(st)+leadHTML(st.lead)
+    +`<div class="msg"><span class="who">${esc(st.who)}</span><span class="b push"><div class="push">
+       <div class="thumb"><div class="big">${esc(st.news.big)}</div></div>
+       <div class="meta"><div class="ttl">${esc(st.news.ttl)}</div><div class="src">${esc(st.news.app)} · ${esc(st.news.src)}</div></div></div></span></div>`
+    +bub(st.who, st.q));
+  gOpts=st.opts; setSheet(optsHTML('답장', gOpts, 'gAnswer'));
+}
+function gAnswer(i){
+  const o=gOpts[i]; push(me(o.s));
+  if(!o.ok && !gRetried){
+    gRetried=true;
+    push(bub(G.who, G.wrong)+bub(G.who, G.retry.q));
+    gOpts=G.retry.opts; setSheet(optsHTML('답장', gOpts, 'gAnswer')); return;
+  }
+  push(bub(G.who, G.good)+`<div class="info">${esc(G.info)}</div>`+bub(G.who, G.beat));
+  gOpts=G.beatOpts; setSheet(optsHTML('답장', gOpts, 'gBeat'));
+}
+function gBeat(i){
+  const o=gOpts[i]; push(me(o.s)+bub(G.who, o.r));
+  setSheet(`<button class="btn" onclick="si++;render()">계속</button>`);
+}
+
+/* ---------- 장면 ---------- */
+let pOpts=[];
+function renderScene(st){
+  pi=0; setTop(st.time, st.place);
+  push(enter(st)+leadHTML(st.lead));
+  setSheet(`<button class="btn" onclick="renderPick()">계속</button>`);
+}
+function renderPick(){
+  const st=STEPS[si], p=st.picks[pi];
+  if(p.pre && !p._shown){ p._shown=true; push(leadHTML(p.pre)); }
+  pOpts=shuffle(p.opts);
+  setSheet(optsHTML(p.ask, pOpts, 'pAnswer'));
+}
+function pAnswer(i){
+  const st=STEPS[si], o=pOpts[i];
+  tally[o.k]++; donePicks++; setTop(st.time, st.place);
+  const last=(pi===st.picks.length-1);
+  push(me(o.s)+react(o.r)+(last&&st.out?sys(st.out):''));
+  if(last) setSheet(`<button class="btn" onclick="si++;render()">계속</button>`);
+  else { pi++; setSheet(`<button class="btn" onclick="renderPick()">계속</button>`); }
+}
+
+/* ---------- 엔딩 · 판정 ---------- */
+function renderEnd(){
+  setTop('',null);
+  const max=Math.max(...ORDER.map(k=>tally[k]));
+  const tied=ORDER.filter(k=>tally[k]===max);
+  if(tied.length>1&&!gameType){
+    push(`<div class="card"><h2>두 유형이 같은 수로 나왔습니다</h2><p class="small" style="margin:0">더 나답다고 느끼는 쪽을 고르시면 됩니다. 우열은 없습니다.</p></div>`);
+    setSheet(tied.map(k=>`<button class="opt" onclick="gameType='${k}';renderResult()">${T[k].emo} <b>${T[k].nm}</b> — ${T[k].sub}</button>`).join(''));
+    return;
+  }
+  if(!gameType) gameType=tied[0];
+  renderResult();
+}
+function renderResult(){
+  const t=T[gameType]; clearLog(); lastPlace=null; sendResult(false);
+  push(`<div class="divider"><span>오늘 나는 어떤 존중시민이었나</span></div>
+  <div class="card result">
+    <div class="emo">${t.emo}</div>
+    <div class="nm" style="color:${t.color}">${t.nm}</div>
+    <div class="sb">${t.sub}</div>
+    <p class="desc">${esc(t.desc)}</p>
+    <div class="hand"><b>다른 유형에게 건네는 말</b>${esc(t.hand)}</div>
+  </div>
+  <div class="note"><b>존중시민</b>은 ${esc(DEF.citizen)}입니다.
+    오늘 당신이 감정노동자를 만난 방식은 <b>${t.nm}</b>입니다.</div>`
+  +ENDING.lead.map(sys).join(''));
+  setSheet(`<button class="btn" onclick="renderReveal()">조사 결과 보기</button>`);
+}
+function renderReveal(){
+  const r=ENDING.reveal;
+  push(`<div class="card" style="margin:8px 0"><div class="reveal" style="margin:0">
+      <div class="n">${esc(r.n)}</div><div style="font-weight:700;font-size:14px">${esc(r.h)}</div>
+      <p style="margin:6px 0 4px">${esc(r.b)}</p><p class="small" style="margin:0">${esc(r.s)}</p></div></div>
+    <div class="card"><h2>한 번 더 점검해 볼까요</h2>
+      <p style="margin:0">방금 나온 유형은 <b>오늘 하루</b>의 대응입니다. 존중 신호등은 <b>최근 3개월</b>의 나를 봅니다. 둘은 다를 수 있습니다.</p></div>`);
+  setSheet(`<button class="btn" onclick="renderCheck()">감정노동 존중 신호등 테스트</button><button class="btn ghost" onclick="renderBye()">여기서 마치기</button>`);
+}
+
+/* ---------- 결과 전송 (익명) ---------- */
+const RID='r'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+function sendResult(done){
+  if(!COLLECT.url||!gameType) return;
+  const n=SIGNAL.items.reduce((a,_,i)=>a+(chk[i]===true?1:0),0);
+  const a_=SIGNAL.items.reduce((a,_,i)=>a+(chk[i]===undefined?0:1),0);
+  const full=(a_===SIGNAL.items.length);
+  const payload={id:RID,type:gameType,typeName:T[gameType].nm,
+    grade:full?gradeOf(n).nm:'',yes:full?n:'',done:!!(done&&full)};
+  try{
+    fetch(COLLECT.url,{method:'POST',mode:'no-cors',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify(payload)});
+  }catch(err){}
+}
+
+/* ---------- 감정노동 존중 신호등 테스트 (별도 페이지) ---------- */
+function renderCheck(){
+  setTop('',null); clearLog();
+  chk={};
+  let html=`<div class="card" style="margin-top:8px"><div class="eyebrow">추가 섹션 · 부천시민다움 체크리스트</div>
+    <h2>감정노동 존중 신호등 테스트</h2>
+    <p class="small" style="margin:0">${esc(SIGNAL.guide)}</p></div><div class="card">`;
+  SIGNAL.items.forEach((it,i)=>{
+    html+=`<div class="q" id="sg-${i}">
+      <div class="qt"><span class="qn">${i+1}</span><span>${esc(it.s)}${it.ex?`<em class="ex">${esc(it.ex)}</em>`:''}</span></div>
+      <div class="yn">
+        <button class="ynb yes" id="y-${i}" onclick="tick(${i},1)">예</button>
+        <button class="ynb no" id="n-${i}" onclick="tick(${i},0)">아니오</button>
+      </div></div>`;
+  });
+  html+=`</div>`;
+  push(html);
+  drawSheet();
+  log.scrollTop=0;
+}
+function answered(){ return SIGNAL.items.reduce((a,_,i)=>a+(chk[i]===undefined?0:1),0); }
+function drawSheet(){
+  const a=answered(), all=SIGNAL.items.length, keep=log.scrollTop;   /* 보던 위치를 그대로 둔다 */
+  setSheet(`<div class="prog"><span>응답 ${a} / ${all}</span><span>${a<all?'남은 문항 '+(all-a)+'개':'모두 응답했습니다'}</span></div>
+    <button class="btn" ${a<all?'disabled':''} onclick="${a<all?'':'renderDual()'}">결과 보기</button>`);
+  log.scrollTop=keep;
+}
+function tick(i,v){
+  chk[i]=!!v;
+  document.getElementById('y-'+i).classList.toggle('on',!!v);
+  document.getElementById('n-'+i).classList.toggle('on',!v);
+  document.getElementById('sg-'+i).classList.add('done');
+  drawSheet();   /* 자동 스크롤 없음 — 참여자가 직접 내리면서 답한다 */
+}
+function gradeOf(n){ return SIGNAL.grades.find(g=>n<=g.max)||SIGNAL.grades[SIGNAL.grades.length-1]; }
+
+function renderDual(){
+  clearLog();
+  const n=SIGNAL.items.reduce((a,_,i)=>a+(chk[i]?1:0),0);
+  const g=gradeOf(n), gt=T[gameType];
+  const tie = n===0
+    ? `오늘 당신은 <b>${gt.nm}</b>으로 감정노동자를 만났습니다. 최근 3개월 동안 해당하는 행동도 없었습니다. 지금처럼 하시면 됩니다.`
+    : n<=3
+    ? `오늘 당신은 <b>${gt.nm}</b>으로 감정노동자를 만났습니다. 다만 최근 3개월 동안 해당하는 행동이 <b>${n}가지</b> 있었습니다. 그 ${n}가지를 줄이는 것이 다음 과제입니다.`
+    : `오늘 당신은 <b>${gt.nm}</b>으로 감정노동자를 만났습니다. 다만 최근 3개월 동안 해당하는 행동이 <b>${n}가지</b> 있었습니다. 오늘 하루의 대응보다 반복되는 행동이 상대에게 더 큰 영향을 줍니다.`;
+  push(`<div class="card" style="margin-top:8px">
+    <div class="eyebrow">존중시민 결과</div><h2 style="margin-bottom:4px">나의 존중</h2>
+    <p class="small" style="margin-bottom:10px">오늘 하루의 대응과 최근 3개월의 행동을 함께 봅니다.</p>
+    <div class="tp"><div class="lb">오늘 — 감정노동자를 대한 방식</div>
+      <div class="v"><span class="e">${gt.emo}</span><span><span class="n" style="color:${gt.color}">${gt.nm}</span><br><span class="s">${gt.sub}</span></span></div></div>
+    <div class="tp"><div class="lb">지난 3개월 — 나의 존중 신호</div>
+      <div class="v"><span class="e">${g.emo}</span><span><span class="n" style="color:${g.color}">${g.nm}</span><br><span class="s">10문항 중 "예" ${n}개</span></span></div>
+      <div class="gd">${esc(g.d)}</div></div>
+    <div class="note">${tie}</div>
+    <p class="small" style="margin:10px 0 0">네 유형에는 우열이 없습니다. 신호등 등급에는 높고 낮음이 있습니다. 유형은 <b>어떻게</b> 대했는지를, 신호등은 <b>무엇을</b> 했는지를 보여 줍니다.</p>
+  </div>
+  <div class="card"><div class="eyebrow">${esc(SIGNAL.slogan.sub)}</div>
+    <h2 style="margin-bottom:12px">${esc(SIGNAL.slogan.title)}</h2>
+    ${SIGNAL.slogan.lines.map(l=>`<div class="acro"><span class="h">${esc(l.h)}</span><span class="t">${esc(l.t)}</span></div>`).join('')}
+  </div>`);
+  setSheet(`<button class="btn" onclick="renderBye(true)">마치기</button>`);
+  log.scrollTop=0;
+  sendResult(true);
+}
+
+function renderBye(withSignal){
+  clearLog(); const gt=T[gameType];
+  const n=SIGNAL.items.reduce((a,_,i)=>a+(chk[i]?1:0),0), g=gradeOf(n);
+  push(`<div class="card result" style="margin-top:8px">
+    <div class="emo">${gt.emo}</div><div class="nm" style="color:${gt.color}">${gt.nm}</div><div class="sb">오늘의 존중시민</div>
+    ${withSignal?`<div class="hand"><b>나의 존중 신호등 (최근 3개월)</b>${g.emo} ${esc(g.nm)} · 10문항 중 "예" ${n}개</div>`:''}
+    <div class="hand"><b>부천시민다움</b>${esc(DEF.buchoen)}</div>
+  </div>`);
+  setSheet(`<button class="btn dark" onclick="location.reload()">처음부터 다시</button>`);
+}
+
+render();
+</script>
+</body>
+</html>
